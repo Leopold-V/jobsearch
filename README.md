@@ -1,4 +1,4 @@
-## Simple job app using github jobs API.
+## Simple job app using github jobs API for demo.
 
 #### React + Tailwind
 
