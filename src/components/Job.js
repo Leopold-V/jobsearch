@@ -9,23 +9,30 @@ export const Job = () => {
     const [search, setSearch] = useState('');
     const [memoryjobList, setmemoryJobList] = useState();
     const [jobList, setJobList] = useState();
+    const [filterActive, setFilterActive] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const inputRef = useRef();
  
     const getJobs = async (search) => {
-        setLoading(true);
-        const rep = await fetch(PROXY_URL + API_URL + 'description=' + search, {
-            method: 'get',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                }
-        });
-        const result = await rep.json();
-        setJobList(result);
-        setmemoryJobList(result);
-        setLoading(false);
+        try {
+            setLoading(true);
+            const rep = await fetch(PROXY_URL + API_URL + 'description=' + search, {
+                method: 'get',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    }
+            });
+            const result = await rep.json();
+            setmemoryJobList(result);
+            setJobList(result);
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+            console.log(error);
+            alert('Error fetching the API');
+        }
     }
 
     const handleChange = (e) => {
@@ -34,30 +41,50 @@ export const Job = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        console.log(inputRef.current.value);
-        getJobs(search);
-        inputRef.current.value = ''; // On met le champs input vide
-        setSearch('') // on remet le state search vide également
+        if (search !== '') {
+            getJobs(search);
+            inputRef.current.value = ''; // On met le champs input vide
+            setSearch('') // on remet le state search vide également
+        } else {
+            alert('You must type something !')
+        }
     }
 
-    const filterList = (e) => {
-        const text = e.target.value;
+    const handleFilterButton = (e) => {
+        const text = e.target.innerText;
         e.target.classList.toggle('active');
-        if (e.target.classList.contains('active')) {
-            e.target.innerText = 'x' + text;
-            const filteredList = jobList.filter((job) => {
-                return (job.description.includes(e.target.innerText) === true || job.title.includes(e.target.innerText) === true);
-            });
-            setJobList(filteredList);
+        if (e.target.classList.contains('active')) {   
+            setFilterActive((array) => [...array, text]);
+            e.target.innerText = 'X ' + text;
         } else {
-            e.target.innerText = text;
-            setJobList(memoryjobList);
+            e.target.innerText = text.slice(1, text.length);
+            setFilterActive(filterActive.filter((ele) => ele !== e.target.innerText));
         }
     }
 
     useEffect(() => {
         inputRef.current.focus();
-    }, [])
+        const handleFilterChange = () => {
+            if (filterActive.length > 0) {
+                setJobList([]);
+                let filteredList = [...memoryjobList];
+                filterActive.forEach((text) => {
+                    filteredList = filteredList.filter((job) => {
+                        return (
+                            job.description.includes(text)
+                            || job.title.includes(text)  
+                            || job.description.includes(text.toLowerCase()) 
+                            || job.title.includes(text.toLowerCase())
+                        );
+                        })
+                    setJobList((job) => [...new Set([...job, ...filteredList])]);
+                    }
+                );
+            }
+        }
+        setJobList(memoryjobList);
+        handleFilterChange();
+    }, [filterActive, memoryjobList])
 
     return (
         <div className="min-h-screen m-4">
@@ -81,18 +108,28 @@ export const Job = () => {
                         ?
                         <>
                         <div className="tag">
-                            <button onClick={filterList} 
-                            className="bg-gray-200 hover:bg-gray-100 px-2 py-1 text-sm rounded mx-3 transition duration-200"
+                            <button onClick={handleFilterButton} 
+                            className="bg-gray-200 hover:bg-gray-100 px-2 py-1 text-sm rounded-2xl mx-2 transition duration-200"
                             >
-                            Fullstack
+                            Senior
                             </button>
-                            <button onClick={filterList}
-                            className="bg-gray-200 hover:bg-gray-100 px-2 py-1 text-sm rounded mx-3 transition duration-200"
+                            <button onClick={handleFilterButton}
+                            className="bg-gray-200 hover:bg-gray-100 px-2 py-1 text-sm rounded-2xl mx-2 transition duration-200"
+                            >
+                            Junior
+                            </button>
+                            <button onClick={handleFilterButton}
+                            className="bg-gray-200 hover:bg-gray-100 px-2 py-1 text-sm rounded-2xl mx-2 transition duration-200"
+                            >
+                            Full Stack
+                            </button>
+                            <button onClick={handleFilterButton}
+                            className="bg-gray-200 hover:bg-gray-100 px-2 py-1 text-sm rounded-2xl mx-2 transition duration-200"
                             >
                             Frontend
                             </button>
-                            <button onClick={filterList}
-                            className="bg-gray-200 hover:bg-gray-100 px-2 py-1 text-sm rounded mx-3 transition duration-200"
+                            <button onClick={handleFilterButton}
+                            className="bg-gray-200 hover:bg-gray-100 px-2 py-1 text-sm rounded-2xl mx-2 transition duration-200"
                             >
                             Backend
                             </button>
