@@ -41,6 +41,7 @@ export const Job = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
+        setFilterActive([]);
         if (search !== '') {
             getJobs(search);
             inputRef.current.value = ''; // On met le champs input vide
