@@ -44,8 +44,8 @@ export const Job = () => {
         setFilterActive([]);
         if (search !== '') {
             getJobs(search);
-            inputRef.current.value = ''; // On met le champs input vide
-            setSearch('') // on remet le state search vide également
+            inputRef.current.value = '';
+            setSearch('');
         } else {
             alert('You must type something !')
         }
